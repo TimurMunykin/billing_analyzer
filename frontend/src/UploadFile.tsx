@@ -73,7 +73,7 @@ const UploadFile: React.FC = () => {
       gap={2}
       p={3}
     >
-      <Typography variant="h5">Загрузите XML-файл для анализа</Typography>
+      <Typography variant="h5">Загрузите файл для анализа</Typography>
 
       <input
         type="file"
