@@ -52,19 +52,6 @@ const UploadFile: React.FC = () => {
     }
   };
 
-  const clearData = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${apiUrl}/clear`);
-      console.log("response", response);
-      setResult("Данные успешно удалены");
-    } catch (error) {
-      console.error("Ошибка загрузки данных", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <Box
       display="flex"
@@ -89,17 +76,6 @@ const UploadFile: React.FC = () => {
         disabled={loading || !file}
       >
         {loading ? <CircularProgress size={24} color="inherit" /> : "Загрузить"}
-      </Button>
-
-      <Button
-        variant="outlined"
-        color="secondary"
-        startIcon={<DeleteIcon />}
-        onClick={clearData}
-        disabled={loading}
-        style={{ marginTop: "10px" }}
-      >
-        Очистить данные
       </Button>
 
       {isDebug && (

@@ -18,9 +18,11 @@ import {
   TableRow,
   TableFooter,
   TableSortLabel,
+  Divider,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import { styled } from "@mui/material/styles";
 
 interface UploadedFile {
   id: number;
@@ -36,6 +38,31 @@ interface SpendingData {
 }
 
 type Order = "asc" | "desc";
+
+const StyledTableContainer = styled(Paper)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  overflow: "hidden",
+  boxShadow: theme.shadows[3],
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  fontWeight: theme.typography.fontWeightRegular,
+  "&:nth-of-type(1)": {
+    fontWeight: theme.typography.fontWeightMedium,
+  },
+}));
+
+const StyledModalContent = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  width: "80%",
+  maxHeight: "80vh",
+  overflowY: "auto",
+  margin: "auto",
+  outline: "none",
+  boxShadow: theme.shadows[5],
+}));
 
 const UploadedFiles: React.FC = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -85,9 +112,9 @@ const UploadedFiles: React.FC = () => {
       const response = await axios.get(`${apiUrl}/analyze/spending/${fileId}`);
       const parsedData = response.data.map((item: any) => ({
         ...item,
-        overreach_cost: parseFloat(item.overreach_cost) || 0, // Ensure numeric
-        budget_covered_calls: parseInt(item.budget_covered_calls, 10) || 0, // Ensure integer
-        total_calls: parseInt(item.total_calls, 10) || 0, // Ensure integer
+        overreach_cost: parseFloat(item.overreach_cost),
+        budget_covered_calls: parseInt(item.budget_covered_calls, 10) || 0,
+        total_calls: parseInt(item.total_calls, 10) || 0,
       }));
       setAnalysisData(parsedData);
       setOpenModal(true);
@@ -104,7 +131,6 @@ const UploadedFiles: React.FC = () => {
     setCurrentFileId(null);
   };
 
-  // Handle sorting by column
   const handleSort = (property: keyof SpendingData) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -121,23 +147,24 @@ const UploadedFiles: React.FC = () => {
     return 0;
   });
 
-  // Calculate total row values
   const totalOverreachCost = analysisData.reduce(
-    (sum, item) => sum + item.overreach_cost,
+    (sum, item) => sum + Number(item.overreach_cost),
     0
   );
   const totalBudgetCoveredCalls = analysisData.reduce(
-    (sum, item) => sum + item.budget_covered_calls,
+    (sum, item) => sum + Number(item.budget_covered_calls),
     0
   );
   const totalCalls = analysisData.reduce(
-    (sum, item) => sum + item.total_calls,
+    (sum, item) => sum + Number(item.total_calls),
     0
   );
 
   return (
     <Box p={3}>
-      <Typography variant="h5">Загруженные файлы</Typography>
+      <Typography variant="h5" gutterBottom>
+        Загруженные файлы
+      </Typography>
       {loading ? (
         <CircularProgress />
       ) : (
@@ -177,99 +204,101 @@ const UploadedFiles: React.FC = () => {
 
       {/* Modal for Spending Analysis */}
       <Modal open={openModal} onClose={closeModal}>
-        <Box
-          component={Paper}
-          sx={{
-            width: "80%",
-            maxHeight: "80vh",
-            overflowY: "auto",
-            margin: "auto",
-            mt: 4,
-            p: 3,
-          }}
-        >
+        <StyledModalContent>
           <Typography variant="h6" align="center" gutterBottom>
             Анализ затрат для файла {currentFileId}
           </Typography>
+          <Divider />
           {analysisData.length === 0 ? (
-            <Typography align="center">Нет данных для анализа</Typography>
+            <Typography align="center" sx={{ mt: 2 }}>
+              Нет данных для анализа
+            </Typography>
           ) : (
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <TableSortLabel
-                      active={orderBy === "caller"}
-                      direction={orderBy === "caller" ? order : "asc"}
-                      onClick={() => handleSort("caller")}
-                    >
-                      Номер
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell align="right">
-                    <TableSortLabel
-                      active={orderBy === "overreach_cost"}
-                      direction={orderBy === "overreach_cost" ? order : "asc"}
-                      onClick={() => handleSort("overreach_cost")}
-                    >
-                      Превышение бюджета (стоимость)
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell align="right">
-                    <TableSortLabel
-                      active={orderBy === "budget_covered_calls"}
-                      direction={
-                        orderBy === "budget_covered_calls" ? order : "asc"
-                      }
-                      onClick={() => handleSort("budget_covered_calls")}
-                    >
-                      Звонки, покрытые бюджетом
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell align="right">
-                    <TableSortLabel
-                      active={orderBy === "total_calls"}
-                      direction={orderBy === "total_calls" ? order : "asc"}
-                      onClick={() => handleSort("total_calls")}
-                    >
-                      Общее количество звонков
-                    </TableSortLabel>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {sortedData.map((data) => (
-                  <TableRow key={data.caller}>
-                    <TableCell>{data.caller}</TableCell>
-                    <TableCell align="right">
-                      {data.overreach_cost.toFixed(2)}
-                    </TableCell>
-                    <TableCell align="right">
-                      {data.budget_covered_calls}
-                    </TableCell>
-                    <TableCell align="right">{data.total_calls}</TableCell>
+            <StyledTableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell>
+                      <TableSortLabel
+                        active={orderBy === "caller"}
+                        direction={orderBy === "caller" ? order : "asc"}
+                        onClick={() => handleSort("caller")}
+                      >
+                        Номер
+                      </TableSortLabel>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <TableSortLabel
+                        active={orderBy === "overreach_cost"}
+                        direction={orderBy === "overreach_cost" ? order : "asc"}
+                        onClick={() => handleSort("overreach_cost")}
+                      >
+                        Превышение бюджета (стоимость)
+                      </TableSortLabel>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <TableSortLabel
+                        active={orderBy === "budget_covered_calls"}
+                        direction={
+                          orderBy === "budget_covered_calls" ? order : "asc"
+                        }
+                        onClick={() => handleSort("budget_covered_calls")}
+                      >
+                        Звонки, покрытые бюджетом
+                      </TableSortLabel>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <TableSortLabel
+                        active={orderBy === "total_calls"}
+                        direction={orderBy === "total_calls" ? order : "asc"}
+                        onClick={() => handleSort("total_calls")}
+                      >
+                        Общее количество звонков
+                      </TableSortLabel>
+                    </StyledTableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell>
-                    <strong>Итого</strong>
-                  </TableCell>
-                  <TableCell align="right">
-                    <strong>{totalOverreachCost.toFixed(2)}</strong>
-                  </TableCell>
-                  <TableCell align="right">
-                    <strong>{totalBudgetCoveredCalls}</strong>
-                  </TableCell>
-                  <TableCell align="right">
-                    <strong>{totalCalls}</strong>
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {sortedData.map((data) => (
+                    <TableRow
+                      key={data.caller}
+                      sx={{
+                        "&:nth-of-type(even)": { backgroundColor: "#f9f9f9" },
+                      }}
+                    >
+                      <StyledTableCell>{data.caller}</StyledTableCell>
+                      <StyledTableCell align="right">
+                        {data.overreach_cost.toFixed(2)}
+                      </StyledTableCell>
+                      <StyledTableCell align="right">
+                        {data.budget_covered_calls}
+                      </StyledTableCell>
+                      <StyledTableCell align="right">
+                        {data.total_calls}
+                      </StyledTableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <StyledTableCell>
+                      <strong>Итого</strong>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <strong>{totalOverreachCost.toFixed(2)}</strong>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <strong>{totalBudgetCoveredCalls}</strong>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <strong>{totalCalls}</strong>
+                    </StyledTableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </StyledTableContainer>
           )}
-        </Box>
+        </StyledModalContent>
       </Modal>
     </Box>
   );
