@@ -1,12 +1,14 @@
-// db.ts
 import { Pool } from "pg";
+import dotenv from "dotenv";
 
-// Подключение к базе данных с использованием переменной окружения
+dotenv.config();
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-// Функция для создания таблиц
+console.warn("process.env.DATABASE_URL", process.env.DATABASE_URL);
+
 const createTables = async (): Promise<void> => {
   const client = await pool.connect();
   try {

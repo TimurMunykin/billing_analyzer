@@ -1,7 +1,7 @@
 version: '3'
 services:
   backend:
-    build: .
+    build: ./app
     container_name: telecom_analyzer_app
     ports:
       - "3000:3000"
