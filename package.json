@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "express": "^4.21.1",
+    "express-fileupload": "^1.5.1",
+    "pg": "^8.13.1",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/express-fileupload": "^1.5.1",
+    "@types/pg": "^8.11.10"
+  }
+}

@@ -1,0 +1,49 @@
+version: '3'
+services:
+  backend:
+    build: .
+    container_name: telecom_analyzer_app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@db:5432/telecom_data
+    depends_on:
+      - db
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: telecom_analyzer_frontend
+    expose:
+      - "80"
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: telecom_analyzer_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: always
+
+  db:
+    image: postgres:13
+    container_name: telecom_analyzer_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: telecom_data
+    ports:
+      - "5432:5432"
+    volumes:
+      - telecom_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  telecom_data:
