@@ -33,7 +33,9 @@ services:
     restart: always
 
   db:
-    image: postgres:13
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: telecom_analyzer_db
     environment:
       POSTGRES_USER: postgres
