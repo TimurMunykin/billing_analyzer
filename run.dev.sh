@@ -4,15 +4,10 @@ echo "Starting local development environment..."
 docker compose up -d db
 
 # BE
-cd app
-npm install
-npm run build
-npm run dev &
+./start-backend.sh &
 
 # FE
-cd ../frontend
-npm install
-npm start &
+./start-frontend.sh &
 
 echo "Local environment is running:"
 echo " - Backend at http://localhost:3000"

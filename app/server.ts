@@ -7,7 +7,12 @@ import xlsx from "xlsx";
 dotenv.config();
 
 const app = express();
-app.use(fileUpload());
+app.use(
+  fileUpload({
+    defCharset: "utf8",
+    defParamCharset: "utf8",
+  })
+);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -87,7 +92,8 @@ app.post("/upload", async (req: Request, res: Response): Promise<void> => {
     const dataRows = jsonData.slice(7);
 
     for (const row of dataRows as any[]) {
-      const [call_date, caller, receiver, duration, result, cost, service] = row;
+      const [call_date, caller, receiver, duration, result, cost, service] =
+        row;
       await client.query(
         "INSERT INTO telecom_data (call_date, caller, receiver, duration, result, cost, service, file_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
         [call_date, caller, receiver, duration, result, cost, service, fileId]
@@ -109,7 +115,9 @@ app.post("/upload", async (req: Request, res: Response): Promise<void> => {
 app.get("/uploads", async (req: Request, res: Response): Promise<void> => {
   const client = await pool.connect();
   try {
-    const result = await client.query("SELECT * FROM uploads ORDER BY upload_date DESC");
+    const result = await client.query(
+      "SELECT * FROM uploads ORDER BY upload_date DESC"
+    );
     res.status(200).json(result.rows);
   } catch (dbError) {
     console.error("Ошибка при получении файлов", dbError);
@@ -141,23 +149,26 @@ app.get("/data", async (req: Request, res: Response): Promise<void> => {
 });
 
 // Endpoint to delete an uploaded file and associated data
-app.delete("/uploads/:id", async (req: Request, res: Response): Promise<void> => {
-  const fileId = parseInt(req.params.id, 10);
+app.delete(
+  "/uploads/:id",
+  async (req: Request, res: Response): Promise<void> => {
+    const fileId = parseInt(req.params.id, 10);
 
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    await client.query("DELETE FROM uploads WHERE id = $1", [fileId]);
-    await client.query("COMMIT");
-    res.status(200).send("Файл и связанные данные успешно удалены");
-  } catch (dbError) {
-    await client.query("ROLLBACK");
-    console.error("Ошибка при удалении данных", dbError);
-    res.status(500).send("Ошибка при удалении данных");
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("DELETE FROM uploads WHERE id = $1", [fileId]);
+      await client.query("COMMIT");
+      res.status(200).send("Файл и связанные данные успешно удалены");
+    } catch (dbError) {
+      await client.query("ROLLBACK");
+      console.error("Ошибка при удалении данных", dbError);
+      res.status(500).send("Ошибка при удалении данных");
+    } finally {
+      client.release();
+    }
   }
-});
+);
 
 // Endpoint for spending analysis
 app.get("/analyze/spending", async (req: Request, res: Response) => {
@@ -220,7 +231,6 @@ app.get("/analyze/spending/:fileId", async (req: Request, res: Response) => {
     client.release();
   }
 });
-
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
