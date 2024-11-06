@@ -35,6 +35,7 @@ interface SpendingData {
   overreach_cost: number;
   budget_covered_calls: number;
   total_calls: number;
+  budget_minutes: number; // Add this line
 }
 
 type Order = "asc" | "desc";
@@ -115,6 +116,7 @@ const UploadedFiles: React.FC = () => {
         overreach_cost: parseFloat(item.overreach_cost),
         budget_covered_calls: parseInt(item.budget_covered_calls, 10) || 0,
         total_calls: parseInt(item.total_calls, 10) || 0,
+        budget_minutes: parseInt(item.budget_minutes, 10) || 0, // Add this line
       }));
       setAnalysisData(parsedData);
       setOpenModal(true);
@@ -157,6 +159,11 @@ const UploadedFiles: React.FC = () => {
   );
   const totalCalls = analysisData.reduce(
     (sum, item) => sum + Number(item.total_calls),
+    0
+  );
+
+  const totalBudgetMinutes = analysisData.reduce(
+    (sum, item) => sum + Number(item.budget_minutes),
     0
   );
 
@@ -256,6 +263,15 @@ const UploadedFiles: React.FC = () => {
                         Общее количество звонков
                       </TableSortLabel>
                     </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <TableSortLabel
+                        active={orderBy === "budget_minutes"}
+                        direction={orderBy === "budget_minutes" ? order : "asc"}
+                        onClick={() => handleSort("budget_minutes")}
+                      >
+                        Минуты в бюджете
+                      </TableSortLabel>
+                    </StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -276,6 +292,9 @@ const UploadedFiles: React.FC = () => {
                       <StyledTableCell align="right">
                         {data.total_calls}
                       </StyledTableCell>
+                      <StyledTableCell align="right">
+                        {data.budget_minutes}
+                      </StyledTableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -292,6 +311,9 @@ const UploadedFiles: React.FC = () => {
                     </StyledTableCell>
                     <StyledTableCell align="right">
                       <strong>{totalCalls}</strong>
+                    </StyledTableCell>
+                    <StyledTableCell align="right">
+                      <strong>{totalBudgetMinutes}</strong>
                     </StyledTableCell>
                   </TableRow>
                 </TableFooter>
