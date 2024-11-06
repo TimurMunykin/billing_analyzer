@@ -31,6 +31,7 @@ interface UploadedFile {
 }
 
 interface SpendingData {
+  service: string; // Add this line
   caller: string;
   overreach_cost: number;
   budget_covered_calls: number;
@@ -149,6 +150,14 @@ const UploadedFiles: React.FC = () => {
     return 0;
   });
 
+  const groupedData = sortedData.reduce((acc: any, item) => {
+    if (!acc[item.service]) {
+      acc[item.service] = [];
+    }
+    acc[item.service].push(item);
+    return acc;
+  }, {});
+
   const totalOverreachCost = analysisData.reduce(
     (sum, item) => sum + Number(item.overreach_cost),
     0
@@ -221,104 +230,104 @@ const UploadedFiles: React.FC = () => {
               Нет данных для анализа
             </Typography>
           ) : (
-            <StyledTableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>
-                      <TableSortLabel
-                        active={orderBy === "caller"}
-                        direction={orderBy === "caller" ? order : "asc"}
-                        onClick={() => handleSort("caller")}
-                      >
-                        Номер
-                      </TableSortLabel>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <TableSortLabel
-                        active={orderBy === "overreach_cost"}
-                        direction={orderBy === "overreach_cost" ? order : "asc"}
-                        onClick={() => handleSort("overreach_cost")}
-                      >
-                        Превышение бюджета (стоимость)
-                      </TableSortLabel>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <TableSortLabel
-                        active={orderBy === "budget_covered_calls"}
-                        direction={
-                          orderBy === "budget_covered_calls" ? order : "asc"
-                        }
-                        onClick={() => handleSort("budget_covered_calls")}
-                      >
-                        Звонки, покрытые бюджетом
-                      </TableSortLabel>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <TableSortLabel
-                        active={orderBy === "total_calls"}
-                        direction={orderBy === "total_calls" ? order : "asc"}
-                        onClick={() => handleSort("total_calls")}
-                      >
-                        Общее количество звонков
-                      </TableSortLabel>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <TableSortLabel
-                        active={orderBy === "budget_minutes"}
-                        direction={orderBy === "budget_minutes" ? order : "asc"}
-                        onClick={() => handleSort("budget_minutes")}
-                      >
-                        Минуты в бюджете
-                      </TableSortLabel>
-                    </StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {sortedData.map((data) => (
-                    <TableRow
-                      key={data.caller}
-                      sx={{
-                        "&:nth-of-type(even)": { backgroundColor: "#f9f9f9" },
-                      }}
-                    >
-                      <StyledTableCell>{data.caller}</StyledTableCell>
-                      <StyledTableCell align="right">
-                        {data.overreach_cost.toFixed(2)}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {data.budget_covered_calls}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {data.total_calls}
-                      </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {data.budget_minutes}
-                      </StyledTableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter>
-                  <TableRow>
-                    <StyledTableCell>
-                      <strong>Итого</strong>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <strong>{totalOverreachCost.toFixed(2)}</strong>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <strong>{totalBudgetCoveredCalls}</strong>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <strong>{totalCalls}</strong>
-                    </StyledTableCell>
-                    <StyledTableCell align="right">
-                      <strong>{totalBudgetMinutes}</strong>
-                    </StyledTableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </StyledTableContainer>
+            <>
+              {Object.keys(groupedData).map((service) => (
+                <React.Fragment key={service}>
+                  <Typography variant="h6" gutterBottom>
+                    {service}
+                  </Typography>
+                  <StyledTableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <StyledTableCell>
+                            <TableSortLabel
+                              active={orderBy === "caller"}
+                              direction={orderBy === "caller" ? order : "asc"}
+                              onClick={() => handleSort("caller")}
+                            >
+                              Номер
+                            </TableSortLabel>
+                          </StyledTableCell>
+                          <StyledTableCell align="right">
+                            <TableSortLabel
+                              active={orderBy === "overreach_cost"}
+                              direction={
+                                orderBy === "overreach_cost" ? order : "asc"
+                              }
+                              onClick={() => handleSort("overreach_cost")}
+                            >
+                              Превышение бюджета (стоимость)
+                            </TableSortLabel>
+                          </StyledTableCell>
+                          <StyledTableCell align="right">
+                            <TableSortLabel
+                              active={orderBy === "budget_covered_calls"}
+                              direction={
+                                orderBy === "budget_covered_calls"
+                                  ? order
+                                  : "asc"
+                              }
+                              onClick={() => handleSort("budget_covered_calls")}
+                            >
+                              Звонки, покрытые бюджетом
+                            </TableSortLabel>
+                          </StyledTableCell>
+                          <StyledTableCell align="right">
+                            <TableSortLabel
+                              active={orderBy === "total_calls"}
+                              direction={
+                                orderBy === "total_calls" ? order : "asc"
+                              }
+                              onClick={() => handleSort("total_calls")}
+                            >
+                              Общее количество звонков
+                            </TableSortLabel>
+                          </StyledTableCell>
+                          <StyledTableCell align="right">
+                            <TableSortLabel
+                              active={orderBy === "budget_minutes"}
+                              direction={
+                                orderBy === "budget_minutes" ? order : "asc"
+                              }
+                              onClick={() => handleSort("budget_minutes")}
+                            >
+                              Минуты в бюджете
+                            </TableSortLabel>
+                          </StyledTableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {groupedData[service].map((data: SpendingData) => (
+                          <TableRow
+                            key={data.caller}
+                            sx={{
+                              "&:nth-of-type(even)": {
+                                backgroundColor: "#f9f9f9",
+                              },
+                            }}
+                          >
+                            <StyledTableCell>{data.caller}</StyledTableCell>
+                            <StyledTableCell align="right">
+                              {data.overreach_cost.toFixed(2)}
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
+                              {data.budget_covered_calls}
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
+                              {data.total_calls}
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
+                              {data.budget_minutes}
+                            </StyledTableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </StyledTableContainer>
+                </React.Fragment>
+              ))}
+            </>
           )}
         </StyledModalContent>
       </Modal>

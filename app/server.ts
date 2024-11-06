@@ -213,15 +213,16 @@ app.get("/analyze/spending/:fileId", async (req: Request, res: Response) => {
   const client = await pool.connect();
   try {
     const query = `
-      SELECT caller,
+      SELECT service,
+             caller,
              SUM(CASE WHEN cost = 0 THEN 0 ELSE cost END) AS overreach_cost,
              SUM(CASE WHEN cost = 0 THEN 1 ELSE 0 END) AS budget_covered_calls,
              COUNT(*) AS total_calls,
              SUM(CASE WHEN cost = 0 THEN duration ELSE 0 END) AS budget_minutes
       FROM telecom_data
       WHERE file_id = $1
-      GROUP BY caller
-      ORDER BY overreach_cost DESC
+      GROUP BY service, caller
+      ORDER BY service, overreach_cost DESC
     `;
     const result = await client.query(query, [fileId]);
     res.status(200).json(result.rows);
