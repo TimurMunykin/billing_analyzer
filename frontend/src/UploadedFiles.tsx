@@ -31,12 +31,13 @@ interface UploadedFile {
 }
 
 interface SpendingData {
-  service: string; // Add this line
+  service: string;
   caller: string;
   overreach_cost: number;
   budget_covered_calls: number;
   total_calls: number;
-  budget_minutes: number; // Add this line
+  budget_minutes: number;
+  exceeded_minutes: number; // Add this line
 }
 
 type Order = "asc" | "desc";
@@ -117,7 +118,8 @@ const UploadedFiles: React.FC = () => {
         overreach_cost: parseFloat(item.overreach_cost),
         budget_covered_calls: parseInt(item.budget_covered_calls, 10) || 0,
         total_calls: parseInt(item.total_calls, 10) || 0,
-        budget_minutes: parseInt(item.budget_minutes, 10) || 0, // Add this line
+        budget_minutes: parseInt(item.budget_minutes, 10) || 0,
+        exceeded_minutes: parseInt(item.exceeded_minutes, 10) || 0, // Add this line
       }));
       setAnalysisData(parsedData);
       setOpenModal(true);
@@ -176,6 +178,11 @@ const UploadedFiles: React.FC = () => {
     0
   );
 
+  const totalExceededMinutes = analysisData.reduce(
+    (sum, item) => sum + Number(item.exceeded_minutes),
+    0
+  );
+
   return (
     <Box p={3}>
       <Typography variant="h5" gutterBottom>
@@ -222,7 +229,7 @@ const UploadedFiles: React.FC = () => {
       <Modal open={openModal} onClose={closeModal}>
         <StyledModalContent>
           <Typography variant="h6" align="center" gutterBottom>
-            Анализ затрат для файла {currentFileId}
+            Анализ зартат для файла {currentFileId}
           </Typography>
           <Divider />
           {analysisData.length === 0 ? (
@@ -295,6 +302,17 @@ const UploadedFiles: React.FC = () => {
                               Минуты в бюджете
                             </TableSortLabel>
                           </StyledTableCell>
+                          <StyledTableCell align="right">
+                            <TableSortLabel
+                              active={orderBy === "exceeded_minutes"}
+                              direction={
+                                orderBy === "exceeded_minutes" ? order : "asc"
+                              }
+                              onClick={() => handleSort("exceeded_minutes")}
+                            >
+                              Превышение бюджета (минуты)
+                            </TableSortLabel>
+                          </StyledTableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -319,6 +337,9 @@ const UploadedFiles: React.FC = () => {
                             </StyledTableCell>
                             <StyledTableCell align="right">
                               {data.budget_minutes}
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
+                              {data.exceeded_minutes}
                             </StyledTableCell>
                           </TableRow>
                         ))}

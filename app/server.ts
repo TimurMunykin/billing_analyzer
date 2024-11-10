@@ -218,7 +218,8 @@ app.get("/analyze/spending/:fileId", async (req: Request, res: Response) => {
              SUM(CASE WHEN cost = 0 THEN 0 ELSE cost END) AS overreach_cost,
              SUM(CASE WHEN cost = 0 THEN 1 ELSE 0 END) AS budget_covered_calls,
              COUNT(*) AS total_calls,
-             SUM(CASE WHEN cost = 0 THEN duration ELSE 0 END) AS budget_minutes
+             SUM(CASE WHEN cost = 0 THEN duration ELSE 0 END) AS budget_minutes,
+             SUM(CASE WHEN cost > 0 THEN duration ELSE 0 END) AS exceeded_minutes
       FROM telecom_data
       WHERE file_id = $1
       GROUP BY service, caller
